@@ -4,9 +4,14 @@
 
 ## 🚀 Instalação em 2 Passos
 
-### 1️⃣ Execute no PowerShell (como Administrador)
+### 1️⃣ Execute no PowerShell (SEM precisar de Administrador)
 ```powershell
-Set-ExecutionPolicy RemoteSigned -Force; Invoke-WebRequest -Uri "https://raw.githubusercontent.com/MatheuzSil/print-bracelets-installer/main/install.ps1" -OutFile "install.ps1"; .\install.ps1
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/MatheuzSil/print-bracelets-installer/main/install.ps1" -OutFile "install.ps1"; .\install.ps1
+```
+
+**OU se der erro de permissão:**
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned -Force; Invoke-WebRequest -Uri "https://raw.githubusercontent.com/MatheuzSil/print-bracelets-installer/main/install.ps1" -OutFile "install.ps1"; .\install.ps1
 ```
 
 ### 2️⃣ Configure o sistema

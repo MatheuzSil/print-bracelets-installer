@@ -58,5 +58,5 @@ Write-Host "Atalhos de teste removidos!" -ForegroundColor Green
 Write-Host ""
 Write-Host "🎯 Próximo passo:" -ForegroundColor Blue  
 Write-Host "Edite o install.ps1 e mude a linha:" -ForegroundColor White
-Write-Host '`$IconPath = "imageres.dll,93"' -ForegroundColor Yellow
+Write-Host '$IconPath = "imageres.dll,93"' -ForegroundColor Yellow
 Write-Host "Para o ícone escolhido!" -ForegroundColor White
