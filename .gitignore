@@ -9,6 +9,5 @@ Desktop.ini
 *.ps1~
 
 # Temp files
-install.ps1
 temp/
 *.tmp
