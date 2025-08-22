@@ -82,18 +82,19 @@ echo  ================================================
 echo   Sistema de Impressao de Pulseiras
 echo  ================================================
 echo.
-echo   [1] Configurar Sistema (Primeira vez)
+echo   [1] Configurar e Iniciar Sistema (Primeira vez)
 echo   [2] Ver Status do Sistema
 echo   [3] Ver Logs em Tempo Real  
-echo   [4] Iniciar Sistema
+echo   [4] Iniciar Sistema (se parado)
 echo   [5] Parar Sistema
 echo   [6] Reiniciar Sistema
-echo   [7] Desinstalar Sistema
-echo   [8] Sair
+echo   [7] Reconfigurar (alterar IPs/IDs)
+echo   [8] Desinstalar Sistema
+echo   [9] Sair
 echo.
 echo  ================================================
 echo.
-set /p opcao=Digite sua opcao (1-8): 
+set /p opcao=Digite sua opcao (1-9): 
 
 if "%opcao%"=="1" goto CONFIGURAR
 if "%opcao%"=="2" goto STATUS  
@@ -101,8 +102,9 @@ if "%opcao%"=="3" goto LOGS
 if "%opcao%"=="4" goto INICIAR
 if "%opcao%"=="5" goto PARAR
 if "%opcao%"=="6" goto REINICIAR
-if "%opcao%"=="7" goto DESINSTALAR
-if "%opcao%"=="8" exit
+if "%opcao%"=="7" goto RECONFIGURAR
+if "%opcao%"=="8" goto DESINSTALAR
+if "%opcao%"=="9" exit
 goto MENU
 
 :CONFIGURAR
@@ -134,6 +136,11 @@ call "C:\PrintBracelets\reiniciar.bat"
 pause
 goto MENU
 
+:RECONFIGURAR
+call "C:\PrintBracelets\reconfigurar.bat"
+pause
+goto MENU
+
 :DESINSTALAR
 call "C:\PrintBracelets\desinstalar.bat"
 pause
@@ -145,11 +152,26 @@ $menuScript | Out-File -FilePath "$InstallPath\menu-principal.bat" -Encoding ASC
 # Outros scripts essenciais
 @"
 @echo off
-title Sistema de Impressao - Configurar
+title Sistema de Impressao - Configurar e Iniciar
 color 0B
 cls
-echo Acessando configuracao do sistema...
+echo ========================================
+echo   Configuracao e Inicio do Sistema
+echo ========================================
+echo.
+echo IMPORTANTE:
+echo - Na primeira vez: Configure ID do totem e IP da impressora
+echo - O sistema iniciara automaticamente apos a configuracao
+echo - Depois nao precisa configurar novamente
+echo.
+echo Acessando configuracao interativa...
+echo.
 docker exec -it print-bracelets-system node setup.js
+echo.
+echo ========================================
+echo Sistema configurado e iniciado!
+echo Use 'Ver Status' para verificar
+echo ========================================
 "@ | Out-File -FilePath "$InstallPath\configurar.bat" -Encoding ASCII
 
 @"
@@ -179,14 +201,42 @@ docker logs -f print-bracelets-system
 title Sistema de Impressao - Iniciar
 color 0A
 cls
-echo Iniciando sistema...
-docker start print-bracelets-system watchtower 2>nul
+echo ========================================
+echo   Iniciando Sistema
+echo ========================================
+echo.
+echo Verificando se sistema ja esta rodando...
+docker ps -q --filter name=print-bracelets-system | findstr . >nul
 if errorlevel 1 (
-    echo Primeira execucao - criando containers...
-    docker run -d --name print-bracelets-system --restart unless-stopped --network host -it --label "com.centurylinklabs.watchtower.enable=true" matheuzsilva/print-bracelets:latest
-    docker run -d --name watchtower --restart unless-stopped -v "//./pipe/docker_engine://./pipe/docker_engine" -e WATCHTOWER_CLEANUP=true -e WATCHTOWER_POLL_INTERVAL=300 -e WATCHTOWER_LABEL_ENABLE=true containrrr/watchtower:latest --interval 300 --cleanup
+    echo ERRO: Container nao encontrado!
+    echo Execute a instalacao primeiro.
+    pause
+    exit /b 1
 )
-echo Sistema iniciado!
+
+echo Verificando se sistema de impressao esta ativo...
+docker exec print-bracelets-system pgrep -f "node print-bracelets.js" >nul 2>&1
+if errorlevel 1 (
+    echo Sistema de impressao parado. Verificando configuracao...
+    echo.
+    echo ATENCAO: Sistema nao esta configurado ou parado!
+    echo.
+    echo Opcoes:
+    echo 1. Se e a primeira vez: Use 'Configurar e Iniciar Sistema'  
+    echo 2. Se ja configurou: Sistema pode ter sido parado
+    echo.
+    set /p opcao="O sistema ja foi configurado antes? (s/N): "
+    if /i "%opcao%"=="s" (
+        echo Tentando iniciar com configuracoes existentes...
+        docker exec -d print-bracelets-system node print-bracelets.js
+        echo Sistema iniciado!
+    ) else (
+        echo Use a opcao 'Configurar e Iniciar Sistema' no menu principal.
+    )
+) else (
+    echo Sistema de impressao ja esta rodando!
+)
+echo.
 "@ | Out-File -FilePath "$InstallPath\iniciar.bat" -Encoding ASCII
 
 @"
@@ -224,6 +274,35 @@ docker rmi matheuzsilva/print-bracelets:latest containrrr/watchtower:latest 2>nu
 docker system prune -f 2>nul
 echo Sistema removido!
 "@ | Out-File -FilePath "$InstallPath\desinstalar.bat" -Encoding ASCII
+
+# Script de Reconfigurar
+@"
+@echo off
+title Sistema de Impressao - Reconfigurar
+color 0C
+cls
+echo ========================================
+echo   Alterar Configuracoes do Sistema
+echo ========================================
+echo.
+echo Isso ira alterar:
+echo - ID do Totem
+echo - IP da Impressora  
+echo - Machine ID
+echo.
+set /p confirmacao="Deseja alterar configuracoes? (s/N): "
+if /i "%confirmacao%" neq "s" exit /b 0
+echo.
+echo Parando sistema atual...
+docker exec print-bracelets-system pkill -f "node print-bracelets.js" 2>nul
+echo.
+echo Iniciando reconfiguracao...
+docker exec -it print-bracelets-system node setup.js
+echo.
+echo ========================================
+echo Sistema reconfigurado!
+echo ========================================
+"@ | Out-File -FilePath "$InstallPath\reconfigurar.bat" -Encoding ASCII
 
 # Criar atalho na área de trabalho
 Write-Host "Criando atalho na área de trabalho..." -ForegroundColor Yellow
