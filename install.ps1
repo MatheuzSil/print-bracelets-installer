@@ -276,6 +276,18 @@ echo Para reinstalar, execute o instalador novamente.
 
 # Criar atalho na área de trabalho
 Write-Host "Criando atalho na área de trabalho..." -ForegroundColor Yellow
+
+# Tentar baixar ícone personalizado
+$IconPath = "$InstallPath\logo.ico"
+try {
+    Write-Host "Baixando ícone personalizado..." -ForegroundColor Blue
+    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/MatheuzSil/print-bracelets-installer/main/logo.ico" -OutFile $IconPath -ErrorAction Stop
+    Write-Host "✓ Ícone personalizado baixado" -ForegroundColor Green
+} catch {
+    Write-Host "⚠ Ícone personalizado não encontrado, usando padrão" -ForegroundColor Yellow
+    $IconPath = "imageres.dll,93"  # Ícone de impressora 3D moderna
+}
+
 $DesktopPath = [Environment]::GetFolderPath('Desktop')
 $ShortcutPath = "$DesktopPath\Sistema de Impressao.lnk"
 
@@ -284,8 +296,10 @@ $Shortcut = $WshShell.CreateShortcut($ShortcutPath)
 $Shortcut.TargetPath = "$InstallPath\menu-principal.bat"
 $Shortcut.WorkingDirectory = $InstallPath
 $Shortcut.Description = "Sistema de Impressao de Pulseiras"
-$Shortcut.IconLocation = "shell32.dll,138"
+$Shortcut.IconLocation = $IconPath
 $Shortcut.Save()
+
+Write-Host "✓ Atalho criado na área de trabalho" -ForegroundColor Green
 
 # Iniciar sistema
 Write-Host "Iniciando sistema..." -ForegroundColor Blue
