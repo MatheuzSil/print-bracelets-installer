@@ -237,7 +237,7 @@ try {
     $Shortcut.TargetPath = "$InstallPath\menu-principal.bat"
     $Shortcut.WorkingDirectory = $InstallPath
     $Shortcut.Description = "Sistema de Impressao de Pulseiras"
-    $Shortcut.IconLocation = "imageres.dll,93"
+    $Shortcut.IconLocation = "shell32.dll,138"
     $Shortcut.Save()
     Write-Host "✓ Atalho criado na área de trabalho" -ForegroundColor Green
 } catch {
