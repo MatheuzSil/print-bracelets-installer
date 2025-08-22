@@ -2,19 +2,18 @@
 
 > **Instalação automática para Windows com interface gráfica**
 
-## 🚀 Instalação em 2 Passos
+## 🚀 Instalação Rápida
 
-### 1️⃣ Execute no PowerShell (SEM precisar de Administrador)
+### Execute no PowerShell:
 ```powershell
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/MatheuzSil/print-bracelets-installer/main/install.ps1" -OutFile "install.ps1"; .\install.ps1
 ```
 
-**OU se der erro de permissão:**
-```powershell
-Set-ExecutionPolicy -Scope CurrentUser RemoteSigned -Force; Invoke-WebRequest -Uri "https://raw.githubusercontent.com/MatheuzSil/print-bracelets-installer/main/install.ps1" -OutFile "install.ps1"; .\install.ps1
-```
-
-### 2️⃣ Configure o sistema
+> **💡 Dica**: Não precisa ser Administrador! Se der erro de permissão, use:
+> ```powershell
+> Set-ExecutionPolicy -Scope CurrentUser RemoteSigned -Force; Invoke-WebRequest -Uri "https://raw.githubusercontent.com/MatheuzSil/print-bracelets-installer/main/install.ps1" -OutFile "install.ps1"; .\install.ps1
+> ```
+### Configurar o sistema:
 - Um ícone será criado na área de trabalho: **"Sistema de Impressao"**
 - Clique duplo → Escolha **"Configurar Sistema (Primeira vez)"**
 - Digite ID do totem e IP da impressora
